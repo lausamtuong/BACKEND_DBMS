@@ -17,6 +17,7 @@ router.post("/insertOrder", controller.insertOrder);
 router.post("/insertProductOrder", controller.insertProductOrder);
 router.post("/getTotalMoneyOrder", controller.getTotalMoneyOrder);
 router.post("/deleteOrderProduct", controller.deleteOrderProduct);
+router.post("/payment", controller.payment);
 router.get("/getAllPromotions", controller.getAllPromotions);
 
 module.exports =  router;

@@ -57,6 +57,7 @@ async function insertOrder(req,res) {
          let pool = await sql.connect(config);
          const order_id = uuidv4().slice(0,4) 
          await pool.request().query(`EXEC insert_ORDER 'ORD${order_id}', N'Đơn hàng${order_id}', '${yy}${mm}${dd}', '${hour}:${minutes}', '${req.body.customer_id}', 'EMP0009'`);
+         console.log(`ORD${order_id}`)
          res.status(200).json({order_id:`ORD${order_id}`})
     }
     catch (error) {
@@ -218,13 +219,43 @@ async function getAllPromotions(req,res) {
 }
 async function deleteCartProduct(req,res) {
     try {
-        console.log(req.body.data)
          let pool = await sql.connect(config);
         await pool.request().query(`EXEC deleteCART_PRODUCT '${req.body.data.product_id}',  '${req.body.data.cart_id}'`);
         res.status(200).json("delete CART_PRODUCT SUCCESS")
     }
     catch (error) {
         res.status(400).json(error)
+    }
+}
+async function payment(req,res) {
+    try {
+        console.log(req.body)
+        const{
+            name,
+            phoneNumber,
+            address,
+            email,
+            customer_id,
+            order_id,
+            payment_note,
+            payment_method,
+            promotion_id,
+            total_money
+          } =req.body
+          const today = new Date()
+          const dd = today.getDate()
+          const mm = today.getMonth()
+          const yy = today.getFullYear()
+          const hours = today.getHours()
+          const min = today.getMinutes()
+          const sec = today.getSeconds()
+          const payment_id = uuidv4().slice(0,5) 
+         let pool = await sql.connect(config);
+        await pool.request().query(`EXEC insertPAYMENT 'PAY${payment_id}',  '${payment_note}','Thành công','${payment_method}','${yy}-${mm}-${dd}','${hours}:${min}:${sec}','${order_id}','${customer_id}','${promotion_id}'`);
+        res.status(200).json("insert PAYMENT SUCCESS")
+    }
+    catch (error) {
+        console.log(error)
     }
 }
 module.exports = {
@@ -243,5 +274,6 @@ module.exports = {
     insertOrder,
     insertProductOrder,
     getTotalMoneyOrder,
-    deleteOrderProduct
+    deleteOrderProduct,
+    payment
 }
