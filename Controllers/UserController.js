@@ -18,7 +18,7 @@ async function register(req,res) {
         else {
             
             await pool.request().query(`INSERT INTO EMPLOYEE(employee_id,_start_date) VALUES ('EMP${id}','${yy}-${mm}-${dd}')`);
-            await pool.request().query(`EXEC insertACCOUNT_CUS '${req.body.id_user}', '${req.body.username}',	'${req.body.password}', N'${req.body.type}', 'EMP${id}'`);
+            await pool.request().query(`EXEC insertACCOUNT_CUS '${req.body.id_clek}', '${req.body.username}',	'${req.body.password}', N'${req.body.type}', 'EMP${id}'`);
         }
         res.status(200).json("Success")
     }
