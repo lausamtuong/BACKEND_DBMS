@@ -4,15 +4,20 @@ const { v4:uuidv4} = require("uuid")
 
 async function register(req,res) {
     try {
-        const cus_id = uuidv4().slice(0,4)
+        const id = uuidv4().slice(0,4)
         const today = new Date()
         var dd = (today.getDate());
         var mm = String(today.getMonth());
         var yy = String(today.getFullYear());
         let pool = await sql.connect(config);
-
-        await pool.request().query(`INSERT INTO CUSTOMER(customer_id,register_date) VALUES ('CUS${cus_id}','${yy}-${mm}-${dd}')`);
-        await pool.request().query(`EXEC insertACCOUNT_CUS '${req.body.id_user}', '${req.body.username}',	'${req.body.password}', N'${req.body.type}', 'CUS${cus_id}'`);
+        if(req.body.type=="Tài khoản khách hàng"){
+            await pool.request().query(`INSERT INTO CUSTOMER(customer_id,register_date) VALUES ('CUS${id}','${yy}-${mm}-${dd}')`);
+            await pool.request().query(`EXEC insertACCOUNT_CUS '${req.body.id_user}', '${req.body.username}',	'${req.body.password}', N'${req.body.type}', 'CUS${id}'`);
+        }
+        else {
+            await pool.request().query(`INSERT INTO EMPLOYEE(employeee_id,_start_date) VALUES ('EMP${id}','${yy}-${mm}-${dd}')`);
+            await pool.request().query(`EXEC insertACCOUNT_CUS '${req.body.id_user}', '${req.body.username}',	'${req.body.password}', N'${req.body.type}', 'EMP${id}'`);
+        }
         res.status(200).json("Success")
     }
     catch (error) {
