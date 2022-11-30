@@ -11,11 +11,13 @@ async function register(req,res) {
         var yy = String(today.getFullYear());
         let pool = await sql.connect(config);
         if(req.body.type=="Tài khoản khách hàng"){
+        
             await pool.request().query(`INSERT INTO CUSTOMER(customer_id,register_date) VALUES ('CUS${id}','${yy}-${mm}-${dd}')`);
             await pool.request().query(`EXEC insertACCOUNT_CUS '${req.body.id_user}', '${req.body.username}',	'${req.body.password}', N'${req.body.type}', 'CUS${id}'`);
         }
         else {
-            await pool.request().query(`INSERT INTO EMPLOYEE(employeee_id,_start_date) VALUES ('EMP${id}','${yy}-${mm}-${dd}')`);
+            
+            await pool.request().query(`INSERT INTO EMPLOYEE(employee_id,_start_date) VALUES ('EMP${id}','${yy}-${mm}-${dd}')`);
             await pool.request().query(`EXEC insertACCOUNT_CUS '${req.body.id_user}', '${req.body.username}',	'${req.body.password}', N'${req.body.type}', 'EMP${id}'`);
         }
         res.status(200).json("Success")
