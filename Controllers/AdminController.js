@@ -1,6 +1,6 @@
 var config = require("../dbconfig");
 const sql = require("mssql");
-const { v4:uuidv4} = require("uuid")
+const { v4: uuidv4 } = require("uuid");
 async function getProduct(req, res) {
   try {
     let pool = await sql.connect(config);
@@ -97,6 +97,139 @@ async function getCustomer(req, res) {
     console.log(error);
   }
 }
+async function sumary(req, res) {
+  try {
+    let pool = await sql.connect(config);
+    let customers = await pool
+      .request()
+      .query(`select count(*) AS 'TOTAL' from CUSTOMER`);
+
+    res.status(200).json(customers.recordsets[0][0]);
+  } catch (error) {
+    console.log(error);
+  }
+}
+async function sumaryOrder(req, res) {
+  try {
+    let pool = await sql.connect(config);
+    let customers = await pool
+      .request()
+      .query(`select count(*) AS 'TOTAL' from _ORDER`);
+    res.status(200).json(customers.recordsets[0][0]);
+  } catch (error) {
+    console.log(error);
+  }
+}
+async function sumaryMoney(req, res) {
+  try {
+    let pool = await sql.connect(config);
+    let customers = await pool
+      .request()
+      .query(` select SUM(total_money) AS TOTAL from _ORDER`);
+    res.status(200).json(customers.recordsets[0][0]);
+  } catch (error) {
+    console.log(error);
+  }
+}
+async function sumaryProduct(req, res) {
+  try {
+    let pool = await sql.connect(config);
+    let customers = await pool
+      .request()
+      .query(` select count(*) as TOTAL from PRODUCT`);
+    res.status(200).json(customers.recordsets[0][0]);
+  } catch (error) {
+    console.log(error);
+  }
+}
+async function getTrans(req, res) {
+  try {
+    let pool = await sql.connect(config);
+    let trans = await pool
+      .request()
+      .query(
+        ` select  DISTINCT TOP 7 * from PAYMENT  Order BY payment_hour  DESC`
+      );
+    res.status(200).json(trans.recordsets[0]);
+  } catch (error) {
+    console.log(error);
+  }
+}
+async function deleteUsers(req, res) {
+  try {
+  
+    let pool = await sql.connect(config);
+    await pool
+      .request()
+      .query(
+        ` delete product where product_id = '${req.body.product_id}   '`
+      );
+      res.status(200).json(`Delete User ${req.body.product_id} Success!`)
+  } catch (error) {
+    console.log(error);
+  }
+}
+async function deleteCustomer(req, res) {
+  console.log(req.body)
+  try {
+    let pool = await sql.connect(config);
+    await pool
+      .request()
+      .query(
+        ` EXEC deleteCUSTOMER '${req.body.customer_id} '`
+      );
+      res.status(200).json(`Delete User ${req.body.product_id} Success!`)
+  } catch (error) {
+    console.log(error);
+  }
+}
+async function updateProduct(req, res) {
+  try {
+  const {
+    product_name,
+    manufacturer,
+    illustration,
+    entry_price,
+    sell_price,
+    category_id,
+    supplier_id,
+    product_id
+  } = req.body;
+    let pool = await sql.connect(config);
+    await pool
+      .request()
+      .query(
+        ` EXEC updatePRODUCT '${product_id}',N'${product_name}',N'${manufacturer}','${illustration}','${entry_price}','${sell_price}','${category_id}','${supplier_id}'`
+      );
+      res.status(200).json("UpdateProduct Success")
+  } catch (error) {
+    res.status(400).json(error);
+  }
+}
+async function updateCustomer(req, res) {
+  try {
+  const {
+    customer_id,
+    register_date,
+    f_name, 
+    l_name,
+    bdate,
+    sex,
+    _address,
+  } = req.body;
+    let pool = await sql.connect(config);
+    await pool
+      .request()
+      .query(
+        ` EXEC updateCUSTOMER '${customer_id }','${register_date}',N'${f_name}',N'${l_name }','${sex}','${bdate}',N'${_address }'`
+      );
+      res.status(200).json("updateCUSTOMER Success")
+  } catch (error) {
+    res
+      .status(400)
+      .json(error?.precedingErrors[0]?.originalError?.info?.message);
+  }
+}
 async function addEmployee(req, res) {
   try {
     let pool = await sql.connect(config);
@@ -125,51 +258,77 @@ VALUES
     ,'12-02-2022'
     ,'loai2'
     ,'BRA0001'   
-    ,'EMP0001'  )`)
+    ,'EMP0001'  )`);
     res.status(200).json(customers.recordsets);
   } catch (error) {
-    res.status(400).json(error?.precedingErrors[0]?.originalError?.info?.message)
+    res
+      .status(400)
+      .json(error?.precedingErrors[0]?.originalError?.info?.message);
   }
 }
-async function addProduct(req,res){
-  const {product_name,
-  manufacturer,
-  entry_price,
-  sell_price,
-  supplier_id ,
-  amount,
-  category_id,
-  illustration} = req.body.data
+async function addProduct(req, res) {
+  const {
+    product_name,
+    manufacturer,
+    entry_price,
+    sell_price,
+    supplier_id,
+
+    category_id,
+    illustration,
+  } = req.body.data;
+
   try {
-    const id = uuidv4().slice(0,5)
+    const id = uuidv4().slice(0, 5);
     let pool = await sql.connect(config);
-    let customers = await pool.request()
-    .query(`EXEC insertPRODUCT 'PRD${id}',  N'${product_name}',  N'${manufacturer}',  N'${illustration}', ${entry_price},  ${sell_price},  ${amount},  '${category_id}',  '${supplier_id}'`);
-   res.status(200).json(customers.recordsets);
+    let customers = await pool
+      .request()
+      .query(
+        `EXEC insertPRODUCT 'PRD${id}',  N'${product_name}',  N'${manufacturer}',  N'${illustration}', ${entry_price},  ${sell_price},  '${category_id}',  '${supplier_id}'`
+      );
+    res.status(200).json(customers.recordsets);
   } catch (error) {
-    console.log(error)
-    res.status(400).json(error?.precedingErrors[0]?.originalError?.info?.message)
+    console.log(error);
+    res
+      .status(400)
+      .json(error?.precedingErrors[0]?.originalError?.info?.message);
   }
 }
-async function addProductChild(req,res){
-  const {amount,
+async function addProductChild(req, res) {
+  const {
+    amount,
     clothes_elastic,
     color,
     shoe_elastic,
-    shoe_type ,
+    shoe_type,
     product_id,
     size,
     style,
-  type} = req.body.data
+    type,
+  } = req.body.data;
   try {
-    const id = uuidv4().slice(0,5)
+    console.log(req.body.data);
     let pool = await sql.connect(config);
-    let customers = await pool.request()
-    .query(`EXEC insert${type} 'PRD${id}',  N'${product_id}',  N'${clothes_elastic}',  N'${size}', ${color},  '${style}'`);
-   res.status(200).json(customers.recordsets);
+    for (var i = 0; i < amount; i++) {
+      var id = uuidv4().slice(0, 5);
+      if (type == "SHOE")
+        await pool.request().query(
+          `EXEC insert${type} 'SHO${id}',  '${product_id}',  N'${clothes_elastic}' , N'${color}', 
+              ${size}
+           ,  N'${style}'`
+        );
+      else
+        await pool.request().query(
+          `EXEC insert${type} 'CLO${id}',  '${product_id}',  N'${clothes_elastic}',
+              '${size}'
+            , N'${color}',  N'${style}'`
+        );
+    }
   } catch (error) {
-    console.log(error)
-    res.status(400).json(error?.precedingErrors[0]?.originalError?.info?.message)
+    console.log(error);
+    res
+      .status(400)
+      .json(error?.precedingErrors[0]?.originalError?.info?.message);
   }
 }
 module.exports = {
@@ -177,5 +336,14 @@ module.exports = {
   getCustomer,
   addEmployee,
   addProduct,
-  addProductChild
+  addProductChild,
+  sumary,
+  sumaryOrder,
+  sumaryMoney,
+  sumaryProduct,
+  getTrans,
+  deleteUsers,
+  updateProduct,
+  updateCustomer,
+  deleteCustomer
 };

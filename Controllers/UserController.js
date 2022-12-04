@@ -36,6 +36,7 @@ async function login(req,res) {
        
         let pool = await sql.connect(config);
         let user = await pool.request().query(`SELECT * from ACCOUNT WHERE [username] = '${email}' AND [_password] = '${password}' ` );
+        console.log(req.body.data)
         res.status(200).json(user.recordsets[0][0]||"false")
     }
     catch (error) {
