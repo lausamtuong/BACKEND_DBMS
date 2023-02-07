@@ -8,12 +8,20 @@ var Orders_route = require("./Routes/Orders")
 var User_route = require("./Routes/User")
 var Admin_route = require("./Routes/Admin")
 var router = express.Router();
-
+var mysql = require('mysql');
+const config = require('./dbconfig');
 const corsOptions ={
   origin:'*', 
   credentials:true,            //access-control-allow-credentials:true
   optionSuccessStatus:200,
 }
+var con = mysql.createConnection(config);
+
+con.connect(function(err) {
+  if (err) throw err;
+  console.log("Connected to the database!");
+});
+
 app.use(function (req, res, next) {
 
   // Website you wish to allow to connect
